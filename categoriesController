@@ -1,0 +1,88 @@
+using Microsoft.AspNetCore.Mvc;
+using prog_part_2.Database;
+using prog_part_2.Models;
+using System.Data.SqlClient;
+
+namespace prog_part_2.Controllers
+{
+    [SessionCheck]
+        [Route("api/[controller]")]
+        [ApiController]
+        public class categoriesController : ControllerBase
+        {//start of class
+            
+            
+            categories cat1;
+            store_info store = new store_info();
+            get_info get = new get_info();
+
+            [HttpGet]
+            public string getCategories()
+            {//start of method
+                return get.get_categories_info();
+            }//end of method
+
+            [HttpPost]
+            public string addCategory(string userID, string eventID, string categoryType, string age)
+            {//start of method
+                cat1 = new categories()
+                {
+                    eventID = Convert.ToInt32(eventID),
+                    categoryType = categoryType,
+                    age = Convert.ToInt32(age)
+                };
+                return store.store_categories_info(userID, cat1.eventID.ToString(), cat1.categoryType, cat1.age.ToString());
+            }//end of method
+
+            [HttpPut]
+            public string updateCategory(string userID, string categoryID, string categoryType, string age)
+            {//start of method
+                string message = "";
+                try
+                {
+                    using (System.Data.SqlClient.SqlConnection connect = new System.Data.SqlClient.SqlConnection(@"Data source=(localdb)\api_both;database=races_prog;"))
+                    {
+                        connect.Open();
+                        System.Data.SqlClient.SqlCommand check = new System.Data.SqlClient.SqlCommand(@"select role from Users where userID='" + userID + "'", connect);
+                        System.Data.SqlClient.SqlDataReader r = check.ExecuteReader();
+                        string role = ""; if (r.Read()) role = r["role"].ToString(); r.Close();
+                        if (role != "organiser") return "Access denied - organisers only can define categories";
+
+                        string query = @"update categories set categoryType='" + categoryType + "', age='" + age + "' where categoryID='" + categoryID + "'";
+                        System.Data.SqlClient.SqlCommand run_query = new System.Data.SqlClient.SqlCommand(query, connect);
+                        run_query.ExecuteNonQuery();
+                        message = "category updated successfully";
+                        connect.Close();
+                    }
+                }
+                catch (Exception error) { message = error.Message; }
+                return message;
+            }//end of method
+
+            [HttpDelete]
+            public string deleteCategory(string userID, string categoryID)
+            {//start of method
+                string message = "";
+                try
+                {
+                    using (System.Data.SqlClient.SqlConnection connect = new System.Data.SqlClient.SqlConnection(@"Data source=(localdb)\api_both;database=Race;"))
+                    {
+                        connect.Open();
+                        System.Data.SqlClient.SqlCommand check = new System.Data.SqlClient.SqlCommand(@"select role from Users where userID='" + userID + "'", connect);
+                        System.Data.SqlClient.SqlDataReader r = check.ExecuteReader();
+                        string role = ""; if (r.Read()) role = r["role"].ToString(); r.Close();
+                        if (role != "organiser") return "Access denied - organisers only";
+
+                        string query = @"delete from categories where categoryID='" + categoryID + "'";
+                        System.Data.SqlClient.SqlCommand run_query = new System.Data.SqlClient.SqlCommand(query, connect);
+                        run_query.ExecuteNonQuery();
+                        message = "category deleted successfully";
+                        connect.Close();
+                    }
+                }
+                catch (Exception error) { message = error.Message; }
+                return message;
+            }//end of method
+
+        }//end of class
+    }//end of namespace
