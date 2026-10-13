@@ -1,0 +1,89 @@
+using Microsoft.AspNetCore.Mvc;
+using prog_part_2.Database;
+using System.Data.SqlClient;
+ using prog_part_2.Models;
+namespace prog_part_2.Controllers
+{
+    [SessionCheck]
+        [Route("api/[controller]")]
+        [ApiController]
+        public class ResultsController : ControllerBase
+        {
+         
+            Models.Results result1;
+            store_info store = new store_info();
+            get_info get = new get_info();
+
+            [HttpGet]
+            public string getResults(string userID)
+            {//start of method
+             //organiser views all results for his events, participant views own results
+                return get.get_results_info(userID);
+            }//end of method
+
+            [HttpPost]
+            public string addResult(string userID, string enrolmentID, string finishTime, string position)
+            {//start of method
+                result1 = new  Models.Results()
+                {
+                    enrolmentID = Convert.ToInt32(enrolmentID),
+                    finishTime = finishTime,
+                    position = Convert.ToInt32(position)
+                };
+                return store.store_results_info(userID, result1.enrolmentID.ToString(), result1.finishTime, result1.position.ToString());
+            }//end of method
+
+            [HttpPut]
+            public string updateResult(string userID, string resultID, string finishTime, string position)
+            {//start of method
+                string message = "";
+                try
+                {
+                    using (System.Data.SqlClient.SqlConnection connect = new System.Data.SqlClient.SqlConnection(@"Data source=(localdb)\api_both;database=races_prog;"))
+                    {
+                        connect.Open();
+                        System.Data.SqlClient.SqlCommand check = new System.Data.SqlClient.SqlCommand(@"select role from Users where userID='" + userID + "'", connect);
+                        System.Data.SqlClient.SqlDataReader r = check.ExecuteReader();
+                        string role = ""; if (r.Read()) role = r["role"].ToString(); r.Close();
+                        if (role != "organiser") return "Access denied - organisers only can capture results";
+
+                        string query = @"update Results set finishTime='" + finishTime + "', position='" + position + "' where resultID='" + resultID + "'";
+                        System.Data.SqlClient.SqlCommand run_query = new System.Data.SqlClient.SqlCommand(query, connect);
+                        run_query.ExecuteNonQuery();
+                        message = "result updated successfully";
+                        connect.Close();
+                    }
+                }
+                catch (Exception error) { message = error.Message; }
+                return message;
+            }//end of method
+
+            [HttpDelete]
+            public string deleteResult(string userID, string resultID)
+            {//start of method
+                string message = "";
+                try
+                {
+                    using (System.Data.SqlClient.SqlConnection connect = new System.Data.SqlClient.SqlConnection(@"Data source=(localdb)\events_guide;database=Race;"))
+                    {
+                        connect.Open();
+                        System.Data.SqlClient.SqlCommand check = new System.Data.SqlClient.SqlCommand(@"select role from Users where userID='" + userID + "'", connect);
+                        System.Data.SqlClient.SqlDataReader r = check.ExecuteReader();
+                        string role = ""; if (r.Read()) role = r["role"].ToString(); r.Close();
+                        if (role != "organiser") return "Access denied - organisers only";
+
+                        string query = @"delete from Results where resultID='" + resultID + "'";
+                        System.Data.SqlClient.SqlCommand run_query = new System.Data.SqlClient.SqlCommand(query, connect);
+                        run_query.ExecuteNonQuery();
+                        message = "result deleted successfully";
+                        connect.Close();
+                    }
+                }
+                catch (Exception error) { message = error.Message; }
+                return message;
+            }//end of method
+
+        }//end of class
+    }//end of namespace
+
+
