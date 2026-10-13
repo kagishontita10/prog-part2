@@ -1,0 +1,47 @@
+using Microsoft.AspNetCore.Mvc;
+using prog_part_2.Database;
+using prog_part_2.Models;
+using System.Data.SqlClient;
+namespace prog_part_2.Controllers
+{
+  
+    
+        [Route("api/[controller]")]
+        [ApiController]
+        public class UsersController : ControllerBase
+        {//start of class
+            
+ 
+            Users user1;
+            store_info store = new store_info();
+            get_info get = new get_info();
+
+            [HttpPost("register")]
+            public string register(string fullName, string email, string password, string role)
+            {//start of method
+                user1 = new Users() { fullName = fullName, email = email, password = password, role = role };
+                return store.store_users_info(user1.fullName, user1.email, user1.password, user1.role);
+            }//end of method
+
+            [HttpGet("login")]
+            public string login(string email, string password)
+            {
+                user1 = new Users() { email = email, password = password };
+                return get.get_user_info(user1.email, user1.password);
+            }
+
+            [HttpGet("profile")]
+            public string view_profile(string userID)
+            {
+                return get.get_profile_info(userID);
+            }
+
+            [HttpPut("updateProfile")]
+            public string updateProfile(string userID, string fullName, string email)
+            {
+                user1 = new Users() { fullName = fullName, email = email };
+                return store.update_user_profile(userID, user1.fullName, user1.email);
+            }
+        }//end of class
+    }
+            
