@@ -35,5 +35,5 @@ Database Schema
 Getting Started
 
 1. Clone the repo:
-   ```bash
+
     https://github.com/kagishontita10/prog-part2
