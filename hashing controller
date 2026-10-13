@@ -1,0 +1,51 @@
+using Microsoft.AspNetCore.Mvc;
+using prog_part_2.Database;
+
+
+namespace prog_part_2.Controllers
+{
+    public class HashingController : Controller
+    {
+
+        [Route("api/[controller]")]
+        [ApiController]
+        public class hashing : ControllerBase
+        {
+
+            private store_info _store = new store_info();
+            private get_info _get = new get_info();
+
+            [HttpPost("register")]
+            public IActionResult register_user(string email, string password)
+            {
+                if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+                    return BadRequest("Email and password required");
+
+                // your store_users_info already does BCrypt hashing inside
+                // so we hash here for controller, but store_users_info will hash again
+                // to avoid double hash, we call the wrapper store_userinfo
+                string hashed_password = BCrypt.Net.BCrypt.HashPassword(password);
+                string result = _store.store_userinfo(email, hashed_password);
+
+                return Ok(result);
+            }
+
+            [HttpGet("login")]
+            public IActionResult login_user(string email, string password)
+            {
+                if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+                    return BadRequest("Email and password required");
+
+                string password_fromTable = _store.get_password_by_email(email);
+
+                if (string.IsNullOrEmpty(password_fromTable))
+                    return NotFound("User not found");
+
+                bool verify_password = BCrypt.Net.BCrypt.Verify(password, password_fromTable);
+
+                if (verify_password) return Ok("password verified");
+                else return Unauthorized("failed to verify");
+            }
+        }
+    }
+}
