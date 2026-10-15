@@ -1,5 +1,5 @@
  prog-part2
-restful web api for managing community events# 🏃‍♂️ Races - Event Management System
+restful web api for managing community events Races - Event Management System
 
 A RESTful Web API built with ASP.NET Core for managing community racing events (Run, Walk, Cycle).
 
@@ -11,7 +11,7 @@ This system allows organisers to create events and participants to enrol and tra
 - Event Management: CRUD for events with location, date, type
 - Categories: Age and distance categories per event (e.g., 5km, 10km, Half Marathon)
 - Routes: Distance and route mapping per event
-- *Enrolments: Participants enrol in events/categories
+- Enrolments: Participants enrol in events/categories
 - Results: Track finishTime, position, recordedAt
 - Weather Integration: Store temperature & rain probability per event
 
