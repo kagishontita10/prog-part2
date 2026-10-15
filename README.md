@@ -37,3 +37,5 @@ Getting Started
 1. Clone the repo:
 
     https://github.com/kagishontita10/prog-part2
+
+   2) my YouTube link is https://youtu.be/o1L7SsT0EUw?si=Dx2axaKYUXq3gtaEV
